@@ -1,0 +1,37 @@
+openapi: 3.0.0
+info:
+  title: Embed API
+  version: 1.0.0
+paths:
+  /embed:
+    post:
+      summary: Process and store chapter content embeddings
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                chapter_id:
+                  type: string
+                  format: uuid
+                  description: ID of the chapter to embed.
+                content:
+                  type: string
+                  description: Markdown content of the chapter.
+      responses:
+        '200':
+          description: Embeddings processed and stored successfully.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Chapter content embedded successfully."
+        '400':
+          description: Invalid request payload.
+        '500':
+          description: Internal server error.

@@ -1,55 +1,62 @@
-# [PROJECT_NAME] Constitution
-<!-- Example: Spec Constitution, TaskFlow Constitution, etc. -->
+# Project Constitution: Physical AI & Humanoid Robotics — Essentials
 
-## Core Principles
+## 1. Project Overview
 
-### [PRINCIPLE_1_NAME]
-<!-- Example: I. Library-First -->
-[PRINCIPLE_1_DESCRIPTION]
-<!-- Example: Every feature starts as a standalone library; Libraries must be self-contained, independently testable, documented; Clear purpose required - no organizational-only libraries -->
+**Project Name:** Physical AI & Humanoid Robotics — Essentials
 
-### [PRINCIPLE_2_NAME]
-<!-- Example: II. CLI Interface -->
-[PRINCIPLE_2_DESCRIPTION]
-<!-- Example: Every library exposes functionality via CLI; Text in/out protocol: stdin/args → stdout, errors → stderr; Support JSON + human-readable formats -->
+**Description:** This project aims to create a concise, accurate, and easy-to-understand book on Physical AI and Humanoid Robotics, delivered via a Docusaurus-based platform. It will include an integrated RAG chatbot that answers questions based solely on the book's content.
 
-### [PRINCIPLE_3_NAME]
-<!-- Example: III. Test-First (NON-NEGOTIABLE) -->
-[PRINCIPLE_3_DESCRIPTION]
-<!-- Example: TDD mandatory: Tests written → User approved → Tests fail → Then implement; Red-Green-Refactor cycle strictly enforced -->
+## 2. Scope and Deliverables
 
-### [PRINCIPLE_4_NAME]
-<!-- Example: IV. Integration Testing -->
-[PRINCIPLE_4_DESCRIPTION]
-<!-- Example: Focus areas requiring integration tests: New library contract tests, Contract changes, Inter-service communication, Shared schemas -->
+### In Scope:
+-   A Docusaurus-based textbook with a clean, modern, minimal, and fast UI.
+-   Six short, focused chapters:
+    1.  Introduction to Physical AI
+    2.  Basics of Humanoid Robotics
+    3.  ROS 2 Fundamentals
+    4.  Digital Twin Simulation (Gazebo + Isaac)
+    5.  Vision-Language-Action Systems
+    6.  Capstone: Simple AI-Robot Pipeline
+-   An integrated RAG chatbot powered by Qdrant, Neon, and FastAPI.
+-   "Select text → Ask AI" interaction feature.
+-   Ready structure for future features:
+    -   "Personalize Chapter" button
+    -   "Urdu Translation" button
+    -   User profile–based content (optional)
+-   Content must be concise, accurate, and easy to understand, adhering to a consistent writing style and formatting.
 
-### [PRINCIPLE_5_NAME]
-<!-- Example: V. Observability, VI. Versioning & Breaking Changes, VII. Simplicity -->
-[PRINCIPLE_5_DESCRIPTION]
-<!-- Example: Text I/O ensures debuggability; Structured logging required; Or: MAJOR.MINOR.BUILD format; Or: Start simple, YAGNI principles -->
+### Out of Scope:
+-   Heavy GPU-dependent steps or components.
+-   Complex, non-essential features that could increase computational cost or complexity.
+-   Any AI chatbot responses that are not strictly derived from the book's text.
 
-### [PRINCIPLE_6_NAME]
+## 3. Core Principles
 
+-   **Simplicity over Complexity:** Prioritize straightforward solutions and minimize intricate designs.
+-   **Content Quality:** Ensure all content is correct, well-structured, and minimal, focusing on essential information.
+-   **Cost Efficiency:** Design the architecture to be compatible with free tiers for embeddings and API usage.
+-   **Lightweight Design:** Avoid heavy GPU usage; prioritize solutions that are computationally light.
+-   **RAG Integrity:** The RAG chatbot must ONLY provide answers derived exclusively from the book's text.
+-   **Consistency:** Maintain a consistent writing style and formatting across all chapters.
+-   **Operational Excellence:** Aim for fast builds, clean project structure, and production-safe code.
 
-[PRINCIPLE__DESCRIPTION]
+## 4. Key Features
 
-## [SECTION_2_NAME]
-<!-- Example: Additional Constraints, Security Requirements, Performance Standards, etc. -->
+-   **Docusaurus Textbook:** A modern, clean, and minimal layout for optimal readability.
+-   **Integrated RAG Chatbot:** Enables interactive Q&A based on book content.
+-   **Contextual AI Interaction:** Allows users to select text and directly query the AI.
+-   **Extensible Structure:** Pre-configured for easy addition of personalization, translation, and user-specific content features.
 
-[SECTION_2_CONTENT]
-<!-- Example: Technology stack requirements, compliance standards, deployment policies, etc. -->
+## 5. Constraints
 
-## [SECTION_3_NAME]
-<!-- Example: Development Workflow, Review Process, Quality Gates, etc. -->
+-   **Minimal Compute Usage:** All components and processes should be designed to use as little computational resources as possible.
+-   **Lightweight Embeddings:** Utilize embedding models suitable for free-tier usage.
+-   **Chapter Size:** Chapters must remain small and focused to enhance readability and maintain conciseness.
 
-[SECTION_3_CONTENT]
-<!-- Example: Code review requirements, testing gates, deployment approval process, etc. -->
+## 6. Success Criteria
 
-## Governance
-<!-- Example: Constitution supersedes all other practices; Amendments require documentation, approval, migration plan -->
-
-[GOVERNANCE_RULES]
-<!-- Example: All PRs/reviews must verify compliance; Complexity must be justified; Use [GUIDANCE_FILE] for runtime development guidance -->
-
-**Version**: [CONSTITUTION_VERSION] | **Ratified**: [RATIFICATION_DATE] | **Last Amended**: [LAST_AMENDED_DATE]
-<!-- Example: Version: 2.1.1 | Ratified: 2025-06-13 | Last Amended: 2025-07-16 -->
+-   **Successful Build:** The book builds without any errors or warnings.
+-   **Accurate RAG Chatbot:** The RAG chatbot consistently provides accurate answers based solely on the book's content.
+-   **Clean UI:** The user interface is visually clean, modern, and professional.
+-   **Content Alignment:** Chapters are short, well-formatted, and directly align with the stated course outcomes.
+-   **Smooth Deployment:** The project deploys successfully to GitHub Pages with all features functional.

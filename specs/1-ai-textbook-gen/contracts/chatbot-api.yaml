@@ -1,0 +1,83 @@
+openapi: 3.0.0
+info:
+  title: RAG Chatbot API
+  version: 1.0.0
+  description: API for the AI-native textbook RAG chatbot, providing question-answering capabilities based on textbook content.
+
+servers:
+  - url: /api/v1
+    description: Base URL for the chatbot API
+
+paths:
+  /chat/query:
+    post:
+      summary: Submit a question to the RAG chatbot
+      operationId: queryChatbot
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ChatbotQueryRequest'
+      responses:
+        '200':
+          description: Successful response with the chatbot's answer.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChatbotQueryResponse'
+        '400':
+          description: Invalid request, e.g., empty query.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+components:
+  schemas:
+    ChatbotQueryRequest:
+      type: object
+      required:
+        - text
+      properties:
+        text:
+          type: string
+          description: The user's question to the chatbot.
+          example: "What is Physical AI?"
+        context_text:
+          type: string
+          nullable: true
+          description: Optional, specific text selected by the user to provide additional context.
+          example: "Physical AI refers to..."
+
+    ChatbotQueryResponse:
+      type: object
+      required:
+        - answer_text
+      properties:
+        answer_text:
+          type: string
+          description: The chatbot's answer, derived from the textbook content.
+          example: "Physical AI is a field that focuses on..."
+        source_references:
+          type: array
+          items:
+            type: string
+          description: Optional references to specific sections or chapters used for the answer.
+          example: ["Chapter 1: Introduction to Physical AI"]
+
+    ErrorResponse:
+      type: object
+      required:
+        - message
+      properties:
+        message:
+          type: string
+          description: A descriptive error message.
+          example: "Query text cannot be empty."

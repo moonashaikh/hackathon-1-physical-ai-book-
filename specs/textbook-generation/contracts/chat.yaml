@@ -1,0 +1,38 @@
+openapi: 3.0.0
+info:
+  title: Chat API
+  version: 1.0.0
+paths:
+  /chat:
+    post:
+      summary: General RAG chatbot interaction
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                message:
+                  type: string
+                  description: The user's chat message.
+      responses:
+        '200':
+          description: Chat message processed successfully.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  response:
+                    type: string
+                    example: "Hello! How can I help you with the textbook today?"
+                  source_segments:
+                    type: array
+                    items:
+                      type: string
+                    example: ["segment 1", "segment 2"]
+        '400':
+          description: Invalid request payload.
+        '500':
+          description: Internal server error.
