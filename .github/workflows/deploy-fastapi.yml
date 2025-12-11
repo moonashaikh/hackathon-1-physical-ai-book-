@@ -1,0 +1,52 @@
+name: Deploy FastAPI Backend
+
+on:
+  push:
+    branches: [ main, 1-ai-textbook-gen ]
+  pull_request:
+    branches: [ main ]
+
+env:
+  PYTHON_VERSION: '3.11'
+
+jobs:
+  deploy:
+    name: Deploy Backend
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Install dependencies
+        run: |
+          cd backend
+          pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Run tests (optional)
+        run: |
+          cd backend
+          # Add test commands here if tests exist
+          # python -m pytest tests/ -v
+
+      - name: Deploy to cloud platform
+        run: |
+          # This is a placeholder for actual deployment
+          # In a real implementation, you would deploy to a cloud service like:
+          # - Render
+          # - Railway
+          # - Fly.io
+          # - Heroku
+          # - AWS/Azure/GCP
+          echo "Backend deployment placeholder"
+
+          # Example deployment commands would go here
+          # For example, for Render:
+          # curl -X POST ${{ secrets.RENDER_DEPLOY_HOOK }}
