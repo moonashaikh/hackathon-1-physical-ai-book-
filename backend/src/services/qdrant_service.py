@@ -11,15 +11,28 @@ logger = logging.getLogger(__name__)
 
 class QdrantService:
     def __init__(self):
-        self.client = QdrantClient(
-            url=os.getenv("QDRANT_URL", "http://localhost:6333"),
-            api_key=os.getenv("QDRANT_API_KEY")
-        )
+        self.url = os.getenv("QDRANT_URL", "http://localhost:6333")
+        self.api_key = os.getenv("QDRANT_API_KEY")
         self.collection_name = "textbook_content"
-        self._ensure_collection_exists()
+
+        try:
+            self.client = QdrantClient(
+                url=self.url,
+                api_key=self.api_key
+            )
+            self._ensure_collection_exists()
+            logger.info("Successfully connected to Qdrant")
+        except Exception as e:
+            logger.warning(f"Could not connect to Qdrant at {self.url}: {e}")
+            logger.info("Qdrant service will be unavailable until connection is established")
+            self.client = None
 
     def _ensure_collection_exists(self):
         """Ensure the collection exists with proper configuration"""
+        if self.client is None:
+            logger.warning("Qdrant client is not available, skipping collection check")
+            return
+
         try:
             # Check if collection exists
             self.client.get_collection(self.collection_name)
@@ -55,6 +68,10 @@ class QdrantService:
 
     def search_similar(self, query_vector: List[float], limit: int = 5) -> List[Dict]:
         """Search for similar content based on the query vector"""
+        if self.client is None:
+            logger.warning("Qdrant client is not available, returning empty results")
+            return []
+
         try:
             results = self.client.search(
                 collection_name=self.collection_name,
@@ -77,6 +94,10 @@ class QdrantService:
 
     def get_content_by_id(self, content_id: str) -> Optional[Dict]:
         """Retrieve specific content by ID"""
+        if self.client is None:
+            logger.warning("Qdrant client is not available, returning None")
+            return None
+
         try:
             records = self.client.retrieve(
                 collection_name=self.collection_name,

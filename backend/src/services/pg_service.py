@@ -13,13 +13,26 @@ class PostgresService:
     def __init__(self):
         self.connection_string = os.getenv("NEON_POSTGRES_URL")
         if not self.connection_string:
-            raise ValueError("NEON_POSTGRES_URL environment variable is not set")
+            logger.warning("NEON_POSTGRES_URL environment variable is not set")
+            self.connection_string = None
+            return
 
         self._connection = None
-        self._ensure_tables_exist()
+        try:
+            self._ensure_tables_exist()
+            logger.info("Successfully connected to PostgreSQL")
+        except Exception as e:
+            logger.warning(f"Could not connect to PostgreSQL: {e}")
+            logger.info("PostgreSQL service will be unavailable until connection is established")
+            self.connection_string = None
+            self._connection = None
 
     def get_connection(self):
         """Get database connection, creating one if needed"""
+        if self.connection_string is None:
+            logger.warning("PostgreSQL connection string is not available")
+            return None
+
         if self._connection is None or self._connection.closed:
             try:
                 self._connection = psycopg2.connect(
@@ -33,7 +46,15 @@ class PostgresService:
 
     def _ensure_tables_exist(self):
         """Ensure the required tables exist in the database"""
+        if self.connection_string is None:
+            logger.warning("PostgreSQL connection string is not available, skipping table creation")
+            return
+
         conn = self.get_connection()
+        if conn is None:
+            logger.warning("PostgreSQL connection is not available, skipping table creation")
+            return
+
         cursor = conn.cursor()
 
         try:
@@ -74,7 +95,15 @@ class PostgresService:
 
     def store_chapter(self, chapter_id: str, title: str, content: str, content_embedding: Optional[str] = None):
         """Store a chapter in the database"""
+        if self.connection_string is None:
+            logger.warning("PostgreSQL connection string is not available, skipping store chapter operation")
+            return
+
         conn = self.get_connection()
+        if conn is None:
+            logger.warning("PostgreSQL connection is not available, skipping store chapter operation")
+            return
+
         cursor = conn.cursor()
 
         try:
@@ -101,7 +130,15 @@ class PostgresService:
 
     def get_chapter_by_id(self, chapter_id: str) -> Optional[Dict]:
         """Retrieve a chapter by its ID"""
+        if self.connection_string is None:
+            logger.warning("PostgreSQL connection string is not available, returning None")
+            return None
+
         conn = self.get_connection()
+        if conn is None:
+            logger.warning("PostgreSQL connection is not available, returning None")
+            return None
+
         cursor = conn.cursor()
 
         try:
@@ -123,7 +160,15 @@ class PostgresService:
 
     def get_all_chapters(self) -> List[Dict]:
         """Retrieve all chapters"""
+        if self.connection_string is None:
+            logger.warning("PostgreSQL connection string is not available, returning empty list")
+            return []
+
         conn = self.get_connection()
+        if conn is None:
+            logger.warning("PostgreSQL connection is not available, returning empty list")
+            return []
+
         cursor = conn.cursor()
 
         try:
@@ -140,7 +185,15 @@ class PostgresService:
 
     def store_chat_history(self, session_id: str, query: str, response: str, context_used: Optional[str] = None):
         """Store a chat interaction in history"""
+        if self.connection_string is None:
+            logger.warning("PostgreSQL connection string is not available, skipping store chat history operation")
+            return
+
         conn = self.get_connection()
+        if conn is None:
+            logger.warning("PostgreSQL connection is not available, skipping store chat history operation")
+            return
+
         cursor = conn.cursor()
 
         try:
