@@ -11,19 +11,16 @@ logger = logging.getLogger(__name__)
 
 class QdrantService:
     def __init__(self):
-        self.url = os.getenv("QDRANT_URL", "http://localhost:6333")
-        self.api_key = os.getenv("QDRANT_API_KEY")
-        self.collection_name = "textbook_content"
-
         try:
             self.client = QdrantClient(
-                url=self.url,
-                api_key=self.api_key
+                url=os.getenv("QDRANT_URL", "http://localhost:6333"),
+                api_key=os.getenv("QDRANT_API_KEY")
             )
+            self.collection_name = "textbook_content"
             self._ensure_collection_exists()
             logger.info("Successfully connected to Qdrant")
         except Exception as e:
-            logger.warning(f"Could not connect to Qdrant at {self.url}: {e}")
+            logger.warning(f"Could not connect to Qdrant: {e}")
             logger.info("Qdrant service will be unavailable until connection is established")
             self.client = None
 
