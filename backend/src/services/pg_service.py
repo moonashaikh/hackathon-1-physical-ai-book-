@@ -83,6 +83,30 @@ class PostgresService:
                 );
             """)
 
+            # Create users table for authentication
+            cursor.execute("""
+                CREATE TABLE IF NOT EXISTS users (
+                    id SERIAL PRIMARY KEY,
+                    email VARCHAR(255) UNIQUE NOT NULL,
+                    password_hash VARCHAR(255) NOT NULL,
+                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                );
+            """)
+
+            # Create user_profiles table for storing background information
+            cursor.execute("""
+                CREATE TABLE IF NOT EXISTS user_profiles (
+                    id SERIAL PRIMARY KEY,
+                    user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+                    software_background VARCHAR(50) CHECK (software_background IN ('beginner', 'intermediate', 'advanced')),
+                    hardware_background VARCHAR(50) CHECK (hardware_background IN ('none', 'basic electronics', 'robotics', 'embedded systems')),
+                    primary_interest VARCHAR(50) CHECK (primary_interest IN ('AI', 'Robotics', 'Web', 'Hardware', 'Mixed')),
+                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                );
+            """)
+
             conn.commit()
             logger.info("Database tables are ready")
 
@@ -208,6 +232,34 @@ class PostgresService:
             logger.error(f"Error storing chat history: {e}")
             conn.rollback()
             raise
+        finally:
+            cursor.close()
+
+    def get_content_by_ids(self, content_ids: List[str]) -> List[Dict]:
+        """Retrieve multiple contents by their IDs"""
+        if self.connection_string is None:
+            logger.warning("PostgreSQL connection string is not available, returning empty list")
+            return []
+
+        conn = self.get_connection()
+        if conn is None:
+            logger.warning("PostgreSQL connection is not available, returning empty list")
+            return []
+
+        cursor = conn.cursor()
+
+        try:
+            # Create a placeholder string for the IN clause
+            placeholders = ','.join(['%s'] * len(content_ids))
+            query = f"SELECT * FROM textbook_content WHERE chapter_id IN ({placeholders}) ORDER BY id"
+            cursor.execute(query, content_ids)
+            results = cursor.fetchall()
+
+            return [dict(row) for row in results]
+
+        except Exception as e:
+            logger.error(f"Error retrieving contents by IDs: {e}")
+            return []
         finally:
             cursor.close()
 

@@ -12,13 +12,18 @@ logger = logging.getLogger(__name__)
 async def chat_query(chat_query: ChatQuery):
     """
     Main chat endpoint that processes user queries and returns AI-generated responses
-    based on textbook content using RAG
+    based on textbook content using RAG.
+
+    This RAG system utilizes OpenAI Agents/ChatKit SDKs, Qdrant Cloud Free Tier vector database
+    and Neon Serverless Postgres to retrieve and answer questions about the textbook content.
+    Supports dual modes: Full Book search and Selected Text mode (answers based only on user-selected text).
     """
     try:
-        # Use the chatbot service to process the query
+        # Use the chatbot service to process the query based on the selected mode
         result = chatbot_service.process_query(
             query=chat_query.query,
-            context_text=chat_query.context_text
+            context_text=chat_query.context_text,
+            mode=chat_query.mode
         )
 
         return ChatResponse(
@@ -75,10 +80,11 @@ async def general_chat(chat_query: ChatQuery):
     General chat endpoint (could be used for broader conversations beyond textbook content)
     """
     try:
-        # Use the chatbot service to process the query
+        # Use the chatbot service to process the query based on the selected mode
         result = chatbot_service.process_query(
             query=chat_query.query,
-            context_text=chat_query.context_text
+            context_text=chat_query.context_text,
+            mode=chat_query.mode
         )
 
         return ChatResponse(

@@ -1,11 +1,17 @@
 from pydantic import BaseModel
 from typing import Optional, List, Dict
 from datetime import datetime
+from enum import Enum
+
+class ChatMode(str, Enum):
+    FULL_BOOK = "full_book"
+    SELECTED_TEXT = "selected_text"
 
 class ChatQuery(BaseModel):
     query: str
     context_text: Optional[str] = None  # Optional context from selected text
     session_id: Optional[str] = None  # For tracking conversation history
+    mode: ChatMode = ChatMode.FULL_BOOK  # Default to full book mode
 
 class ChatResponse(BaseModel):
     response: str

@@ -7,6 +7,7 @@ const Chatbot = () => {
   const [messages, setMessages] = useState([]);
   const [inputValue, setInputValue] = useState('');
   const [selectedText, setSelectedText] = useState('');
+  const [mode, setMode] = useState('full_book'); // 'full_book' or 'selected_text'
 
   // Function to handle text selection
   useEffect(() => {
@@ -14,6 +15,8 @@ const Chatbot = () => {
       const selectedText = window.getSelection().toString().trim();
       if (selectedText) {
         setSelectedText(selectedText);
+        // Auto-switch to selected text mode when text is selected
+        setMode('selected_text');
       }
     };
 
@@ -32,8 +35,8 @@ const Chatbot = () => {
     setMessages(prev => [...prev, userMessage]);
 
     try {
-      // Call the backend API using the client service
-      const data = await chatbotAPIClient.queryChat(inputValue, selectedText);
+      // Call the backend API using the client service with mode
+      const data = await chatbotAPIClient.queryChat(inputValue, selectedText, null, mode);
       const botMessage = { sender: 'bot', text: data.response, timestamp: new Date() };
       setMessages(prev => [...prev, botMessage]);
     } catch (error) {
@@ -42,7 +45,17 @@ const Chatbot = () => {
     }
 
     setInputValue('');
-    setSelectedText('');
+    // Don't clear selectedText if in selected_text mode, as it might be needed for multiple queries
+    if (mode === 'full_book') {
+      setSelectedText('');
+    }
+  };
+
+  const handleModeChange = (newMode) => {
+    setMode(newMode);
+    if (newMode === 'full_book') {
+      setSelectedText(''); // Clear selected text when switching to full book mode
+    }
   };
 
   return (
@@ -50,7 +63,24 @@ const Chatbot = () => {
       {isOpen ? (
         <div className={styles.chatWindow}>
           <div className={styles.chatHeader}>
-            <h3>AI Textbook Assistant</h3>
+            <div className={styles.headerContent}>
+              <h3>AI Textbook Chatbot</h3>
+              <div className={styles.modeSelector}>
+                <button
+                  className={`${styles.modeButton} ${mode === 'full_book' ? styles.activeMode : ''}`}
+                  onClick={() => handleModeChange('full_book')}
+                >
+                  Full Book
+                </button>
+                <button
+                  className={`${styles.modeButton} ${mode === 'selected_text' ? styles.activeMode : ''}`}
+                  onClick={() => handleModeChange('selected_text')}
+                  disabled={!selectedText}
+                >
+                  Selected Text
+                </button>
+              </div>
+            </div>
             <button onClick={() => setIsOpen(false)} className={styles.closeButton}>
               ×
             </button>
@@ -61,9 +91,14 @@ const Chatbot = () => {
                 {msg.text}
               </div>
             ))}
-            {selectedText && (
+            {selectedText && mode === 'selected_text' && (
               <div className={styles.contextPreview}>
-                <strong>Context:</strong> {selectedText.substring(0, 100)}...
+                <strong>Selected Text:</strong> {selectedText.substring(0, 100)}...
+              </div>
+            )}
+            {mode === 'selected_text' && !selectedText && (
+              <div className={styles.instruction}>
+                Please select text in the textbook to use the Selected Text mode.
               </div>
             )}
           </div>
@@ -72,7 +107,7 @@ const Chatbot = () => {
               type="text"
               value={inputValue}
               onChange={(e) => setInputValue(e.target.value)}
-              placeholder="Ask about the textbook content..."
+              placeholder={mode === 'selected_text' ? "Ask about the selected text..." : "Ask about the textbook content..."}
               className={styles.chatInput}
             />
             <button type="submit" className={styles.sendButton}>
@@ -82,7 +117,7 @@ const Chatbot = () => {
         </div>
       ) : (
         <button onClick={() => setIsOpen(true)} className={styles.openButton}>
-          💬 AI Assistant
+          🤖
         </button>
       )}
     </div>

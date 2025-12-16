@@ -12,10 +12,19 @@ logger = logging.getLogger(__name__)
 class QdrantService:
     def __init__(self):
         try:
-            self.client = QdrantClient(
-                url=os.getenv("QDRANT_URL", "http://localhost:6333"),
-                api_key=os.getenv("QDRANT_API_KEY")
-            )
+            qdrant_url = os.getenv("QDRANT_URL", "http://localhost:6333")
+            qdrant_api_key = os.getenv("QDRANT_API_KEY")
+
+            # For local Qdrant, API key is often not required
+            if qdrant_api_key:
+                self.client = QdrantClient(
+                    url=qdrant_url,
+                    api_key=qdrant_api_key
+                )
+            else:
+                # Connect without API key (for local instance)
+                self.client = QdrantClient(url=qdrant_url)
+
             self.collection_name = "textbook_content"
             self._ensure_collection_exists()
             logger.info("Successfully connected to Qdrant")
@@ -32,36 +41,54 @@ class QdrantService:
 
         try:
             # Check if collection exists
-            self.client.get_collection(self.collection_name)
+            collection_info = self.client.get_collection(self.collection_name)
             logger.info(f"Collection '{self.collection_name}' already exists")
+
+            # Check if the vector size is correct (1536 for OpenAI embeddings)
+            vector_size = collection_info.config.params.vectors.size
+            if vector_size != 1536:
+                logger.warning(f"Collection vector size is {vector_size}, expected 1536 for OpenAI embeddings. "
+                              f"Consider recreating the collection for optimal performance.")
         except:
-            # Create collection if it doesn't exist
+            # Create collection if it doesn't exist - using 1536 dimensions for OpenAI embeddings
             self.client.create_collection(
                 collection_name=self.collection_name,
-                vectors_config=models.VectorParams(size=384, distance=models.Distance.COSINE),  # Using all-MiniLM-L6-v2 which produces 384-dim vectors
+                vectors_config=models.VectorParams(size=1536, distance=models.Distance.COSINE),  # Using OpenAI embeddings which produce 1536-dim vectors
             )
-            logger.info(f"Created collection '{self.collection_name}'")
+            logger.info(f"Created collection '{self.collection_name}' with 1536-dimensional vectors")
 
-    def store_content(self, content_id: str, content: str, metadata: Dict = None):
+    def store_content(self, content_id: str, content: str, embedding: List[float], metadata: Dict = None):
         """Store content with its embedding in Qdrant"""
+        if self.client is None:
+            logger.warning("Qdrant client is not available, skipping store content operation")
+            return False
+
         if metadata is None:
             metadata = {}
 
-        # We'll embed the content in the embedding_service, so for now just store the content
-        # This method will be called after embedding is generated
-        points = [
-            models.PointStruct(
-                id=content_id,
-                vector=[],  # Will be filled in by embedding service
-                payload={
-                    "content": content,
-                    "metadata": metadata
-                }
-            )
-        ]
+        try:
+            points = [
+                models.PointStruct(
+                    id=content_id,
+                    vector=embedding,
+                    payload={
+                        "content": content,
+                        "metadata": metadata
+                    }
+                )
+            ]
 
-        # For now, we'll just return the structure - actual embedding happens elsewhere
-        return points
+            # Store the point in Qdrant
+            self.client.upsert(
+                collection_name=self.collection_name,
+                points=points
+            )
+
+            logger.info(f"Stored content with ID {content_id} in Qdrant")
+            return True
+        except Exception as e:
+            logger.error(f"Error storing content in Qdrant: {e}")
+            return False
 
     def search_similar(self, query_vector: List[float], limit: int = 5) -> List[Dict]:
         """Search for similar content based on the query vector"""

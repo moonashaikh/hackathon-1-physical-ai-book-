@@ -1,9 +1,13 @@
+"""
+Embedding service for the RAG chatbot system.
+Utilizes OpenAI embedding APIs with fallback to sentence transformers.
+"""
 import numpy as np
 from typing import List, Union
 import logging
 import os
 from dotenv import load_dotenv
-from sentence_transformers import SentenceTransformer
+import openai
 
 load_dotenv()
 
@@ -11,47 +15,87 @@ logger = logging.getLogger(__name__)
 
 class EmbeddingService:
     def __init__(self):
-        model_name = os.getenv("EMBEDDING_MODEL", "all-MiniLM-L6-v2")
-        try:
-            self.model = SentenceTransformer(model_name)
-            logger.info(f"Loaded embedding model: {model_name}")
-        except Exception as e:
-            logger.warning(f"Could not load embedding model {model_name}: {e}")
-            logger.info("Embedding service will be unavailable until dependencies are properly installed")
-            self.model = None
+        # Initialize OpenAI API key
+        openai.api_key = os.getenv("OPENAI_API_KEY")
+
+        if not openai.api_key:
+            logger.warning("OPENAI_API_KEY environment variable is not set")
+            self.use_openai = False
+        else:
+            self.use_openai = True
+            logger.info("OpenAI API key loaded successfully")
+
+        # Fallback to sentence transformers if OpenAI is not available
+        self.model = None
+        if not self.use_openai:
+            try:
+                from sentence_transformers import SentenceTransformer
+                model_name = os.getenv("EMBEDDING_MODEL", "all-MiniLM-L6-v2")
+                self.model = SentenceTransformer(model_name)
+                logger.info(f"Loaded fallback embedding model: {model_name}")
+            except ImportError:
+                logger.warning("Sentence Transformers library not available, using mock embeddings")
+                logger.info("Install sentence-transformers for fallback functionality: pip install sentence-transformers")
+            except Exception as e:
+                logger.warning(f"Could not load fallback embedding model: {e}")
 
     def generate_embedding(self, text: str) -> List[float]:
         """Generate embedding for a single text"""
-        if self.model is None:
-            logger.warning("Embedding model is not available, returning mock embedding")
-            # Return a mock embedding (384-dimensional vector of zeros)
-            # This matches the expected size for all-MiniLM-L6-v2
-            return [0.0] * 384
+        if self.use_openai:
+            # Use OpenAI embeddings
+            try:
+                response = openai.embeddings.create(
+                    input=text,
+                    model="text-embedding-ada-002"  # OpenAI's recommended embedding model
+                )
+                embedding = response.data[0].embedding
+                return embedding
+            except Exception as e:
+                logger.error(f"Error generating OpenAI embedding: {e}")
+                logger.info("Falling back to sentence transformers or mock embeddings")
 
-        try:
-            embedding = self.model.encode([text])
-            # Convert to list of floats for JSON serialization
-            return embedding[0].tolist()
-        except Exception as e:
-            logger.error(f"Error generating embedding: {e}")
-            # Return a mock embedding as fallback
-            return [0.0] * 384
+        # Fallback to sentence transformers
+        if self.model is not None:
+            try:
+                embedding = self.model.encode([text])
+                # Convert to list of floats for JSON serialization
+                return embedding[0].tolist()
+            except Exception as e:
+                logger.error(f"Error generating embedding with sentence transformers: {e}")
+
+        # Final fallback to mock embedding
+        logger.warning("Embedding model is not available, returning mock embedding")
+        # OpenAI embeddings are 1536-dimensional, so return that size for consistency
+        return [0.0] * 1536
 
     def generate_embeddings(self, texts: List[str]) -> List[List[float]]:
         """Generate embeddings for multiple texts"""
-        if self.model is None:
-            logger.warning("Embedding model is not available, returning mock embeddings")
-            # Return mock embeddings (384-dimensional vectors of zeros)
-            return [[0.0] * 384 for _ in texts]
+        if self.use_openai:
+            # Use OpenAI embeddings
+            try:
+                response = openai.embeddings.create(
+                    input=texts,
+                    model="text-embedding-ada-002"  # OpenAI's recommended embedding model
+                )
+                embeddings = [item.embedding for item in response.data]
+                return embeddings
+            except Exception as e:
+                logger.error(f"Error generating OpenAI embeddings: {e}")
+                logger.info("Falling back to sentence transformers or mock embeddings")
 
-        try:
-            embeddings = self.model.encode(texts)
-            # Convert to list of lists of floats
-            return [embedding.tolist() for embedding in embeddings]
-        except Exception as e:
-            logger.error(f"Error generating embeddings: {e}")
-            # Return mock embeddings as fallback
-            return [[0.0] * 384 for _ in texts]
+        # Fallback to sentence transformers
+        if self.model is not None:
+            try:
+                embeddings = self.model.encode(texts)
+                # Convert to list of lists of floats
+                return [embedding.tolist() for embedding in embeddings]
+            except Exception as e:
+                logger.error(f"Error generating embeddings with sentence transformers: {e}")
+
+        # Final fallback to mock embeddings
+        logger.warning("Embedding model is not available, returning mock embeddings")
+        # OpenAI embeddings are 1536-dimensional, so return that size for consistency
+        return [[0.0] * 1536 for _ in texts]
 
     def cosine_similarity(self, vec1: List[float], vec2: List[float]) -> float:
         """Calculate cosine similarity between two vectors"""

@@ -210,14 +210,16 @@ Wait for consent; never auto-create ADRs. Group related decisions (stacks, authe
 See `.specify/memory/constitution.md` for code quality, testing, performance, security, and architecture principles.
 
 ## Active Technologies
-- Python 3.11+ (for FastAPI) + Node.js (for Docusaurus), Docusaurus, FastAPI, Qdrant, Neon Postgres, lightweight embedding library (e.g., Sentence Transformers with a small model) (1-ai-textbook-gen)
+- Python 3.11+ (for FastAPI) + Node.js (for Docusaurus), Docusaurus, FastAPI, OpenAI Agents/ChatKit SDKs, Qdrant Cloud Free Tier, Neon Postgres, lightweight embedding library (e.g., Sentence Transformers with a small model) (1-ai-textbook-gen)
 - Qdrant (vector embeddings) (1-ai-textbook-gen)
 - Neon Postgres (metadata) (1-ai-textbook-gen)
+- OpenAI (embeddings and potential response generation) (1-ai-textbook-gen)
 
 ## Recent Changes
 - 1-ai-textbook-gen: Added Python 3.11+ (for FastAPI) + Node.js (for Docusaurus), Docusaurus, FastAPI, Qdrant, Neon Postgres, lightweight embedding library (e.g., Sentence Transformers with a small model)
 - 1-ai-textbook-gen: Added Qdrant (vector embeddings)
 - 1-ai-textbook-gen: Added Neon Postgres (metadata)
+- 1-ai-textbook-gen: Added OpenAI Agents/ChatKit SDKs integration for enhanced RAG functionality
 
 **Last updated**: 2025-12-05
 

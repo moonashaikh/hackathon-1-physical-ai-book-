@@ -113,6 +113,21 @@ const config = {
             label: 'Textbook',
           },
           {
+            to: '/vectordb',
+            label: 'Vector DB',
+            position: 'left',
+          },
+          {
+            to: '/signup',
+            label: 'Sign Up',
+            position: 'left',
+          },
+          {
+            to: '/signin',
+            label: 'Sign In',
+            position: 'left',
+          },
+          {
             href: 'https://github.com/your-organization/physical-AI-Robotics',
             label: 'GitHub',
             position: 'right',
@@ -153,24 +168,16 @@ const config = {
             ],
           },
           {
-            title: 'AI & Robotics',
+            title: 'Created By',
             items: [
               {
-                label: 'Robotics Stack Exchange',
-                href: 'https://robotics.stackexchange.com/',
-              },
-              {
-                label: 'AI Papers',
-                href: 'https://arxiv.org/list/cs.RO/recent',
-              },
-              {
-                label: 'OpenAI',
-                href: 'https://openai.com',
+                label: 'Rashida Shaikh, Engineer and AI Developer',
+                href: '#',
               },
             ],
           },
         ],
-        copyright: `Copyright © ${new Date().getFullYear()} Physical AI Robotics Project. Built with Docusaurus.`,
+        copyright: `Copyright © ${new Date().getFullYear()} Physical AI Robotics Project. Built with Docusaurus. Created by Rashida Shaikh, Engineer and AI Developer.`,
       },
       prism: {
         theme: require('prism-react-renderer').themes.github,

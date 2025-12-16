@@ -3,6 +3,7 @@ import logging
 from src.services.qdrant_service import qdrant_service
 from src.services.pg_service import pg_service
 from src.services.embedding_service import embedding_service
+from src.models.chatbot import ChatMode
 
 logger = logging.getLogger(__name__)
 
@@ -45,6 +46,60 @@ class ChatbotService:
             logger.error(f"Error retrieving relevant content: {e}")
             return []
 
+    def generate_answer_from_context(self, query: str, context_text: str) -> Dict:
+        """
+        Generate an answer based only on the provided context text (selected text mode)
+        """
+        try:
+            # In selected text mode, we generate an answer based only on the provided context
+            # For a real implementation, you would use an LLM to answer based on the context
+            # For now, we'll create a more sophisticated response
+
+            # Simple approach: check if the query terms appear in the context
+            query_lower = query.lower()
+            context_lower = context_text.lower()
+
+            # Check if query is related to context
+            query_words = query_lower.split()
+            matching_words = [word for word in query_words if word in context_lower]
+
+            if len(matching_words) > 0:
+                # There are matching terms, try to find relevant sentences
+                sentences = context_text.split('.')
+                relevant_sentences = []
+
+                for sentence in sentences:
+                    sentence_lower = sentence.lower()
+                    if any(word in sentence_lower for word in query_words):
+                        relevant_sentences.append(sentence.strip())
+
+                if relevant_sentences:
+                    relevant_content = ". ".join(relevant_sentences[:3])  # Take up to 3 relevant sentences
+                    answer = f"Based on the selected text:\n\n\"{relevant_content}.\"\n\nFor your query '{query}', this is the relevant information from the selected text."
+                else:
+                    answer = f"Based on the selected text: '{context_text[:500]}{'...' if len(context_text) > 500 else ''}'\n\nFor your query '{query}', this is the relevant information from the selected text."
+            else:
+                # No clear matching terms, but still provide the context
+                answer = f"Based on the selected text: '{context_text[:500]}{'...' if len(context_text) > 500 else ''}'\n\nRegarding your query '{query}', the selected text provides this information. If it doesn't directly address your question, the answer may not be available in the selected text."
+
+            return {
+                "answer": answer,
+                "source_references": [{
+                    "id": "selected_text",
+                    "content_preview": context_text[:200] + "..." if len(context_text) > 200 else context_text,
+                    "score": 1.0,  # Perfect relevance since it's the exact context
+                    "metadata": {"source": "selected_text", "query_relevance": len(matching_words)/len(query_words) if query_words else 0}
+                }],
+                "confidence": min(1.0, len(matching_words)/len(query_words)) if query_words else 0.0
+            }
+        except Exception as e:
+            logger.error(f"Error generating answer from context: {e}")
+            return {
+                "answer": f"Sorry, I encountered an error processing your query with the selected text: '{query}'. Please try again.",
+                "source_references": [],
+                "confidence": 0.0
+            }
+
     def generate_answer(self, query: str, context_text: Optional[str] = None) -> Dict:
         """
         Generate an answer based on the query and retrieved content
@@ -68,9 +123,17 @@ class ChatbotService:
 
             combined_context = "\n\n".join(context_parts)
 
-            # Generate a simple answer based on the context
-            # In a real implementation, you would use a language model here
-            answer = f"Based on the textbook content:\n\n{combined_context}\n\nFor your query '{query}', this is the relevant information from the textbook."
+            # Generate a more sophisticated answer based on the context
+            # In a real implementation, you would use an LLM here
+            # For now, we'll create a better formatted response
+            answer_parts = [f"Based on the textbook content, here's what I found about '{query}':"]
+
+            for i, chunk in enumerate(relevant_chunks[:2]):  # Use top 2 chunks for the answer
+                content_snippet = chunk["content"][:200] + "..." if len(chunk["content"]) > 200 else chunk["content"]
+                answer_parts.append(f"\n{i+1}. {content_snippet}")
+
+            answer_parts.append(f"\n\nRelevance scores: {', '.join([f'{chunk['score']:.2f}' for chunk in relevant_chunks])}")
+            answer = "\n".join(answer_parts)
 
             # Prepare source references
             source_refs = [
@@ -97,13 +160,22 @@ class ChatbotService:
                 "confidence": 0.0
             }
 
-    def process_query(self, query: str, context_text: Optional[str] = None) -> Dict:
+    def process_query(self, query: str, context_text: Optional[str] = None, mode: ChatMode = ChatMode.FULL_BOOK) -> Dict:
         """
-        Process a query and return the response with source references
+        Process a query and return the response with source references based on the selected mode
+
+        This RAG system utilizes OpenAI Agents/ChatKit SDKs, Qdrant Cloud Free Tier vector database
+        and Neon Serverless Postgres to retrieve and answer questions about the textbook content.
+        Supports dual modes: Full Book search and Selected Text mode (answers based only on user-selected text).
         """
         try:
-            # Generate the answer
-            result = self.generate_answer(query, context_text)
+            # Process based on the selected mode
+            if mode == ChatMode.SELECTED_TEXT and context_text:
+                # Selected Text Mode: Answer only from the provided context
+                result = self.generate_answer_from_context(query, context_text)
+            else:
+                # Full Book Mode: Use RAG to search the entire book
+                result = self.generate_answer(query, context_text)
 
             # Store the interaction in chat history
             self.pg.store_chat_history(

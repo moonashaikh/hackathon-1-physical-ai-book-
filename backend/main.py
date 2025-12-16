@@ -20,10 +20,12 @@ logger = logging.getLogger(__name__)
 
 # Import API routers
 from src.api.chatbot import router as chatbot_router
+from src.api.content import router as content_router
+from src.api.auth import router as auth_router
 
 app = FastAPI(
     title="AI Textbook RAG Chatbot API",
-    description="API for interacting with the AI-Native Textbook using RAG",
+    description="RAG Chatbot API utilizing OpenAI Agents/ChatKit SDKs, FastAPI, Neon Serverless Postgres database, and Qdrant Cloud Free Tier to answer user questions about the textbook content. Supports dual modes: Full Book search and Selected Text mode (answers based only on user-selected text).",
     version="1.0.0"
 )
 
@@ -38,6 +40,8 @@ app.add_middleware(
 
 # Include API routes
 app.include_router(chatbot_router, prefix="/api", tags=["chatbot"])
+app.include_router(content_router, prefix="/api", tags=["content"])
+app.include_router(auth_router, prefix="/api", tags=["auth"])
 
 @app.get("/")
 def read_root():
@@ -74,4 +78,4 @@ async def general_exception_handler(request, exc):
 
 if __name__ == "__main__":
     logger.info("Starting AI Textbook RAG Chatbot API server...")
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+    uvicorn.run(app, host="0.0.0.0", port=8004)
