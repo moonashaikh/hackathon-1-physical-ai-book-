@@ -1,90 +1,59 @@
-# Dependencies
-node_modules/
+# Environment variables
+.env
+
+# Python
 __pycache__/
-*.pyc
-*.pyo
-*.pyd
+*.py[cod]
+*.class
+*.so
 .Python
 env/
 venv/
+ENV/
 .venv/
-pip-log.txt
-pip-delete-this-directory.txt
-.tox/
+.env
+.env.local
+.env.*.local
+.envrc
+.pytest_cache/
 .coverage
-.coverage.*
-.cache
-nosetests.xml
-coverage.xml
-*.cover
-*.log
-.git/modules/
-.DS_Store
-Thumbs.db
+htmlcov/
+.pyup.yml
+.isort.cfg
+.tox/
+.coverage.xml
+noxfile.py
 
-# Python
-*.py[cod]
-*$py.class
-*.so
-.Python
-build/
-develop-eggs/
-dist/
-downloads/
-eggs/
-.eggs/
-lib/
-lib64/
-parts/
-sdist/
-var/
-wheels/
-*.egg-info/
-.installed.cfg
-*.egg
-
-# Node.js
+# Node.js / Docusaurus
 node_modules/
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
-.pnp
+lerna-debug.log*
+.pnp/
 .pnp.js
 .next/
 .nuxt/
+.vuepress/dist/
 dist/
-
-# Docusaurus
+build/
+.nyc_output/
+coverage/
+*.lcov
+.nyc_output
+coverage/
+coverage/**/*
+lib-cov/**/*
 .docusaurus/
-.build/
-.temp/
+.buildinfo
+.vercel
 .cache/
 
-# Backend
-__pycache__/
-*.py[cod]
-*$py.class
-.env*
-.env.local
-.env.development.local
-.env.test.local
-.env.production.local
-.pytest_cache/
-.coverage
-htmlcov/
-.cov/
-.coverage.*
+# Database files
+*.db
+!backend/test_auth.db  # Keep test database for the project
 
-# IDE
-.vscode/
-.idea/
-*.swp
-*.swo
-*~
-.DS_Store
-Thumbs.db
-
-# OS
+# OS generated files
 .DS_Store
 .DS_Store?
 ._*
@@ -92,82 +61,16 @@ Thumbs.db
 .Trashes
 ehthumbs.db
 Thumbs.db
-Thumbs.db:encryptable
+desktop.ini
+$RECYCLE.BIN/
+*.nfs
+*~.nfs
 
-# Environment variables
-.env
-.env.local
-.env.*.local
-
-# Build outputs
-build/
-dist/
-*.min.js
-*.min.css
-
-# Logs
-logs/
-*.log
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-
-# Runtime
-pids
-*.pid
-*.seed
-*.pid.lock
-
-# Coverage
-coverage/
-*.gcov
-*.lcov
-*.profraw
-
-# Temporary folders
-tmp/
-temp/
-
-# Backend specific
-backend/__pycache__/
-backend/*.py[cod]
-backend/*$py.class
-backend/.env*
-backend/venv/
-backend/venv/
-
-# Frontend specific
-frontend/.docusaurus/
-frontend/build/
-frontend/node_modules/
-frontend/.cache/
-frontend/.env*
-
-# Test files
-test/
-tests/
-spec/
-*.test.js
-*.spec.js
-*.test.ts
-*.spec.ts
-
-# Secrets and sensitive data
-secrets/
-*.key
-*.pem
-*.crt
-*.cert
-credentials.json
-config/credentials.json
-config/secrets.json
-
-# Local development
-.vscode/settings.json
+# IDE
+.vscode/
 .idea/
-*.local
-.settings/
-
-# Docker
-.dockerignore
-.docker/
+*.swp
+*.swo
+*~
+.vs/
+*.log

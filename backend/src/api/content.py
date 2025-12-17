@@ -5,6 +5,7 @@ import logging
 from src.models.chatbot import ChatQuery, ChatResponse, QueryRequest, QueryResponse
 from src.services.content_service import content_service
 from src.services.qdrant_service import qdrant_service
+from src.middleware.auth_middleware import get_current_user
 from pydantic import BaseModel
 
 router = APIRouter()
@@ -20,7 +21,7 @@ class ContentUploadRequest(BaseModel):
     chapters: List[Chapter]
 
 @router.post("/content/upload", response_model=Dict[str, bool])
-async def upload_textbook_content(content_request: ContentUploadRequest):
+async def upload_textbook_content(content_request: ContentUploadRequest, current_user: dict = Depends(get_current_user)):
     """
     Upload textbook content to be indexed for RAG
     """
@@ -35,7 +36,7 @@ async def upload_textbook_content(content_request: ContentUploadRequest):
         raise HTTPException(status_code=500, detail="Internal server error uploading textbook content")
 
 @router.post("/content/upload-single")
-async def upload_single_chapter(chapter: Chapter):
+async def upload_single_chapter(chapter: Chapter, current_user: dict = Depends(get_current_user)):
     """
     Upload a single chapter to be indexed for RAG
     """
@@ -53,7 +54,7 @@ async def upload_single_chapter(chapter: Chapter):
         raise HTTPException(status_code=500, detail="Internal server error uploading chapter")
 
 @router.get("/vector-db-info")
-async def get_vector_db_info():
+async def get_vector_db_info(current_user: dict = Depends(get_current_user)):
     """
     Get information about the vector database contents
     """
@@ -124,7 +125,7 @@ async def get_vector_db_info():
         raise HTTPException(status_code=500, detail="Internal server error getting vector database info")
 
 @router.get("/vector-db-points")
-async def get_vector_db_points(skip: int = 0, limit: int = 10):
+async def get_vector_db_points(skip: int = 0, limit: int = 10, current_user: dict = Depends(get_current_user)):
     """
     Get points from the vector database with pagination
     """

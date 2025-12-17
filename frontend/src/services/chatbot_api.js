@@ -9,7 +9,7 @@
 // Docusaurus-compatible API URL - using a simple constant
 // In Docusaurus, environment variables are handled differently
 // You can override this in docusaurus.config.js if needed
-const API_BASE_URL = 'http://localhost:8004/api';
+const API_BASE_URL = 'http://localhost:8005/api';
 
 class ChatbotAPIClient {
   constructor() {
@@ -17,15 +17,29 @@ class ChatbotAPIClient {
   }
 
   /**
+   * Get the auth token from localStorage
+   */
+  getAuthToken() {
+    return localStorage.getItem('access_token');
+  }
+
+  /**
    * Send a query to the chatbot API
    */
   async queryChat(query, contextText = null, sessionId = null, mode = 'full_book') {
     try {
+      const token = this.getAuthToken();
+      const headers = {
+        'Content-Type': 'application/json',
+      };
+
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+      }
+
       const response = await fetch(`${this.baseURL}/chat/query`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: headers,
         body: JSON.stringify({
           query: query,
           context_text: contextText,
@@ -50,11 +64,18 @@ class ChatbotAPIClient {
    */
   async queryText(query, contextText = null, topK = 5, mode = 'full_book') {
     try {
+      const token = this.getAuthToken();
+      const headers = {
+        'Content-Type': 'application/json',
+      };
+
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+      }
+
       const response = await fetch(`${this.baseURL}/query`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: headers,
         body: JSON.stringify({
           query: query,
           context_text: contextText,
@@ -79,11 +100,18 @@ class ChatbotAPIClient {
    */
   async generalChat(query, contextText = null, sessionId = null, mode = 'full_book') {
     try {
+      const token = this.getAuthToken();
+      const headers = {
+        'Content-Type': 'application/json',
+      };
+
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+      }
+
       const response = await fetch(`${this.baseURL}/chat`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: headers,
         body: JSON.stringify({
           query: query,
           context_text: contextText,
@@ -108,11 +136,18 @@ class ChatbotAPIClient {
    */
   async getVectorDbInfo() {
     try {
+      const token = this.getAuthToken();
+      const headers = {
+        'Content-Type': 'application/json',
+      };
+
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+      }
+
       const response = await fetch(`${this.baseURL}/vector-db-info`, {
         method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: headers,
       });
 
       if (!response.ok) {
@@ -131,11 +166,18 @@ class ChatbotAPIClient {
    */
   async getVectorDbPoints(skip = 0, limit = 10) {
     try {
+      const token = this.getAuthToken();
+      const headers = {
+        'Content-Type': 'application/json',
+      };
+
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+      }
+
       const response = await fetch(`${this.baseURL}/vector-db-points?skip=${skip}&limit=${limit}`, {
         method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: headers,
       });
 
       if (!response.ok) {

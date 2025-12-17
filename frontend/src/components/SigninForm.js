@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import Link from '@docusaurus/Link';
 import styles from './AuthForm.module.css';
+import { signIn } from '../services/auth_client';
 
 const SigninForm = () => {
   const [formData, setFormData] = useState({
@@ -24,29 +25,18 @@ const SigninForm = () => {
     setError('');
 
     try {
-      const response = await fetch('http://localhost:8004/api/auth/signin', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          email: formData.email,
-          password: formData.password
-        })
-      });
+      const result = await signIn(formData.email, formData.password);
 
-      const data = await response.json();
-
-      if (response.ok) {
-        // Store the token in localStorage
-        localStorage.setItem('access_token', data.access_token);
-        // Redirect to dashboard or home page
-        window.location.href = '/';
+      if (result && result.session) {
+        // Store the token in localStorage (for compatibility with existing code)
+        localStorage.setItem('access_token', result.session.token);
+        // Redirect to textbook intro page after successful signin
+        window.location.href = '/docs/intro';
       } else {
-        setError(data.detail || 'Signin failed');
+        setError(result?.error?.message || 'Signin failed');
       }
     } catch (err) {
-      setError('An error occurred during signin');
+      setError(err?.error?.message || 'An error occurred during signin');
     } finally {
       setLoading(false);
     }

@@ -22,6 +22,7 @@ logger = logging.getLogger(__name__)
 from src.api.chatbot import router as chatbot_router
 from src.api.content import router as content_router
 from src.api.auth import router as auth_router
+from src.api.better_auth import router as better_auth_router
 
 app = FastAPI(
     title="AI Textbook RAG Chatbot API",
@@ -42,6 +43,7 @@ app.add_middleware(
 app.include_router(chatbot_router, prefix="/api", tags=["chatbot"])
 app.include_router(content_router, prefix="/api", tags=["content"])
 app.include_router(auth_router, prefix="/api", tags=["auth"])
+app.include_router(better_auth_router, prefix="/api/better-auth", tags=["better-auth"])
 
 @app.get("/")
 def read_root():

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import Link from '@docusaurus/Link';
 import styles from './AuthForm.module.css';
+import { signUpWithBackground } from '../services/auth_client';
 
 const SignupForm = () => {
   const [formData, setFormData] = useState({
@@ -27,32 +28,29 @@ const SignupForm = () => {
     setError('');
 
     try {
-      const response = await fetch('http://localhost:8004/api/auth/signup', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          email: formData.email,
-          password: formData.password,
-          software_background: formData.softwareBackground,
-          hardware_background: formData.hardwareBackground,
-          primary_interest: formData.primaryInterest
-        })
-      });
+      // Prepare background data for Better Auth
+      const backgroundData = {
+        software_background: formData.softwareBackground,
+        hardware_background: formData.hardwareBackground,
+        primary_interest: formData.primaryInterest
+      };
 
-      const data = await response.json();
+      const result = await signUpWithBackground(
+        formData.email,
+        formData.password,
+        backgroundData
+      );
 
-      if (response.ok) {
-        // Store the token in localStorage
-        localStorage.setItem('access_token', data.access_token);
-        // Redirect to homepage after successful signup
-        window.location.href = '/';
+      if (result && result.session) {
+        // Store the token in localStorage (for compatibility with existing code)
+        localStorage.setItem('access_token', result.session.token);
+        // Redirect to textbook intro page after successful signup
+        window.location.href = '/docs/intro';
       } else {
-        setError(data.detail || 'Signup failed');
+        setError(result?.error?.message || 'Signup failed');
       }
     } catch (err) {
-      setError('An error occurred during signup');
+      setError(err?.error?.message || 'An error occurred during signup');
     } finally {
       setLoading(false);
     }

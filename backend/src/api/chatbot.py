@@ -4,12 +4,13 @@ import logging
 
 from src.models.chatbot import ChatQuery, ChatResponse, QueryRequest, QueryResponse
 from src.services.chatbot_service import chatbot_service
+from src.middleware.auth_middleware import get_current_user
 
 router = APIRouter()
 logger = logging.getLogger(__name__)
 
 @router.post("/chat/query", response_model=ChatResponse)
-async def chat_query(chat_query: ChatQuery):
+async def chat_query(chat_query: ChatQuery, current_user: dict = Depends(get_current_user)):
     """
     Main chat endpoint that processes user queries and returns AI-generated responses
     based on textbook content using RAG.
@@ -37,7 +38,7 @@ async def chat_query(chat_query: ChatQuery):
         raise HTTPException(status_code=500, detail="Internal server error processing your query")
 
 @router.post("/query", response_model=QueryResponse)
-async def query_endpoint(query_request: QueryRequest):
+async def query_endpoint(query_request: QueryRequest, current_user: dict = Depends(get_current_user)):
     """
     Query endpoint for retrieving relevant textbook content based on a query
     """
@@ -75,7 +76,7 @@ async def query_endpoint(query_request: QueryRequest):
         raise HTTPException(status_code=500, detail="Internal server error processing your query")
 
 @router.post("/chat", response_model=ChatResponse)
-async def general_chat(chat_query: ChatQuery):
+async def general_chat(chat_query: ChatQuery, current_user: dict = Depends(get_current_user)):
     """
     General chat endpoint (could be used for broader conversations beyond textbook content)
     """
